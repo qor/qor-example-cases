@@ -2,10 +2,12 @@
 
 ### Setup test DB
 
-cd $GOPATH/src/github.com/qor/qor-example-cases
-docker-compose -f docker-compose.yml up -d
+* cd $GOPATH/src/github.com/qor/qor-example-cases
+
+* docker-compose -f docker-compose.yml up -d
 
 ### Run test case
 
-cd CASE-PATH
-go run main.go
+* cd CASE-PATH
+
+* go run main.go
