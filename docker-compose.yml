@@ -1,0 +1,10 @@
+version: '2'
+services:
+    postgres:
+        image: postgres
+        environment:
+        - "POSTGRES_USER=qor_test"
+        - "POSTGRES_PASSWORD=123"
+        - "POSTGRES_DB=qor_test"
+        ports:
+        - "6000:5432"
