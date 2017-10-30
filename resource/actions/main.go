@@ -43,7 +43,7 @@ func main() {
 		Name: "Action with error",
 		Handler: func(argument *admin.ActionArgument) error {
 			argument.Context.AddError(fmt.Errorf("This is a error"))
-			return fmt.Errorf("This is a error")
+			return fmt.Errorf("This is a error in return")
 		},
 		Modes:      []string{"edit", "index", "show"},
 		Permission: roles.Allow(roles.CRUD, roles.Anyone),
