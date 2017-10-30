@@ -49,6 +49,15 @@ func main() {
 		Permission: roles.Allow(roles.CRUD, roles.Anyone),
 	})
 
+	orderR.Action(&admin.Action{
+		Name: "Action runs OK",
+		Handler: func(argument *admin.ActionArgument) error {
+			return nil
+		},
+		Modes:      []string{"edit", "index", "show"},
+		Permission: roles.Allow(roles.CRUD, roles.Anyone),
+	})
+
 	mux := http.NewServeMux()
 	adm.MountTo("/admin", mux)
 	color.Green("URL: %v", "http://localhost:3000/admin/orders")
