@@ -11,3 +11,8 @@
 * cd CASE-PATH
 
 * go run main.go
+
+### How to create example
+
+Refer existing examples, use default template [https://github.com/qor/qor-example-cases/blob/master/template.go](https://github.com/qor/qor-example-cases/blob/master/template.go)
+
