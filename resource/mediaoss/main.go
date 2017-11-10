@@ -7,10 +7,10 @@ import (
 	"github.com/jinzhu/configor"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/qor/admin"
 	"github.com/qor/media"
 	"github.com/qor/media/oss"
 	"github.com/qor/oss/s3"
+	"github.com/qor/qor-example-cases/config"
 	appkitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/appkit/server"
 )
@@ -30,27 +30,23 @@ type Config struct {
 }
 
 func main() {
-	db, err := gorm.Open("postgres", "user=qor_test password=123 dbname=qor_test sslmode=disable host=localhost port=6000")
-	if err != nil {
-		panic(err)
-	}
-	config := Config{}
-	err = configor.Load(&config)
+	db := config.DB
+	appConfig := Config{}
+	err := configor.Load(&appConfig)
 	if err != nil {
 		panic(err)
 	}
 
-	oss.Storage = s3.New(&s3.Config{AccessID: config.AccessID, AccessKey: config.AccessKey, Region: config.Region, Bucket: config.Bucket})
+	oss.Storage = s3.New(&s3.Config{AccessID: appConfig.AccessID, AccessKey: appConfig.AccessKey, Region: appConfig.Region, Bucket: appConfig.Bucket})
 
 	media.RegisterCallbacks(db)
 
 	db.AutoMigrate(&Order{})
 
-	adm := admin.New(&admin.AdminConfig{DB: db})
-	orderR := adm.AddResource(&Order{})
+	orderR := config.Admin.AddResource(&Order{})
 	_ = orderR
 	mux := http.NewServeMux()
-	adm.MountTo("/admin", mux)
+	config.Admin.MountTo("/admin", mux)
 	color.Green("URL: %v", "http://localhost:3000/admin/orders")
 	server.ListenAndServe(server.Config{Addr: ":3000"}, appkitlog.Default(), mux)
 }

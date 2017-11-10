@@ -9,6 +9,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/qor/admin"
+	"github.com/qor/qor-example-cases/config"
 	"github.com/qor/roles"
 	appkitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/appkit/server"
@@ -24,10 +25,7 @@ type Order struct {
 // MODE=data go run main.go
 
 func main() {
-	db, err := gorm.Open("postgres", "user=qor_test password=123 dbname=qor_test sslmode=disable host=localhost port=6000")
-	if err != nil {
-		panic(err)
-	}
+	db := config.DB
 	if os.Getenv("MODE") == "data" {
 		db.DropTable(&Order{})
 		db.AutoMigrate(&Order{})
@@ -37,7 +35,7 @@ func main() {
 		db.AutoMigrate(&Order{})
 	}
 
-	adm := admin.New(&admin.AdminConfig{DB: db})
+	adm := config.Admin
 	orderR := adm.AddResource(&Order{})
 	orderR.Action(&admin.Action{
 		Name: "Action with error",
