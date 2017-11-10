@@ -9,6 +9,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/qor/admin"
 	"github.com/qor/qor"
+	"github.com/qor/qor-example-cases/config"
 	appkitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/appkit/server"
 )
@@ -24,10 +25,7 @@ type Order struct {
 // MODE=data go run main.go
 
 func main() {
-	db, err := gorm.Open("postgres", "user=qor_test password=123 dbname=qor_test sslmode=disable host=localhost port=6000")
-	if err != nil {
-		panic(err)
-	}
+	db := config.DB
 
 	if os.Getenv("MODE") == "data" {
 		db.DropTable(&Order{})
@@ -49,8 +47,7 @@ func main() {
 	}
 	db.LogMode(true)
 
-	adm := admin.New(&admin.AdminConfig{DB: db})
-	orderR := adm.AddResource(&Order{})
+	orderR := config.Admin.AddResource(&Order{})
 	orderR.Scope(&admin.Scope{
 		Name:    "Pending",
 		Default: true,
@@ -107,7 +104,7 @@ func main() {
 	})
 
 	mux := http.NewServeMux()
-	adm.MountTo("/admin", mux)
+	config.Admin.MountTo("/admin", mux)
 	color.Green("URL: %v", "http://localhost:3000/admin/orders")
 	server.ListenAndServe(server.Config{Addr: ":3000"}, appkitlog.Default(), mux)
 }
