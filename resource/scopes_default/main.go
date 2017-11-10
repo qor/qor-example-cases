@@ -24,10 +24,11 @@ type Order struct {
 // MODE=data go run main.go
 
 func main() {
-	db, err := gorm.Open("postgres", "user=qor password=qor dbname=qor_test sslmode=disable host=localhost")
+	db, err := gorm.Open("postgres", "user=qor_test password=123 dbname=qor_test sslmode=disable host=localhost port=6000")
 	if err != nil {
 		panic(err)
 	}
+
 	if os.Getenv("MODE") == "data" {
 		db.DropTable(&Order{})
 		db.AutoMigrate(&Order{})
