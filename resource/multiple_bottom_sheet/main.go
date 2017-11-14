@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -68,6 +68,6 @@ func main() {
 	mux := http.NewServeMux()
 	// amount to /admin, so visit `/admin` to view the admin interface
 	Admin.MountTo("/admin", mux)
-	fmt.Println("started")
-	http.ListenAndServe(":9000", mux)
+	color.Green("URL: %v", "http://localhost:3000/admin/users")
+	http.ListenAndServe(":3000", mux)
 }
