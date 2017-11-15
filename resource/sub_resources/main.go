@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"net/http"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/qor/media/oss"
 	"github.com/qor/oss/s3"
 	"github.com/qor/qor-example-cases/config"
-	"github.com/qor/roles"
 	appkitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/appkit/server"
 )
@@ -26,9 +26,42 @@ type Order struct {
 
 type OrderItem struct {
 	gorm.Model
-	Name    string
-	OrderID uint
-	File    oss.OSS
+	Name       string
+	OrderID    uint
+	File       oss.OSS
+	CustomFile OSS
+}
+
+type OSS struct {
+	oss.OSS
+}
+
+func (o *OSS) Scan(data interface{}) (err error) {
+	switch values := data.(type) {
+	case []byte:
+		if string(values) != "" {
+			o.Url = string(values)
+		}
+	case string:
+		return o.Scan([]byte(values))
+	case []string:
+		for _, str := range values {
+			if err := o.Scan(str); err != nil {
+				return err
+			}
+		}
+	default:
+		return o.OSS.Scan(data)
+	}
+	return
+}
+
+func (o OSS) Value() (driver.Value, error) {
+	if o.Delete {
+		return nil, nil
+	}
+
+	return o.Url, nil
 }
 
 // run with dummy data
@@ -70,7 +103,8 @@ func main() {
 	db.AutoMigrate(&Order{})
 
 	adm := admin.New(&admin.AdminConfig{DB: db})
-	orderR := adm.AddResource(&Order{}, &admin.Config{Permission: roles.Deny(roles.Create, roles.Anyone)})
+	orderR := adm.AddResource(&Order{})
+	// orderR := adm.AddResource(&Order{}, &admin.Config{Permission: roles.Deny(roles.Create, roles.Anyone)})
 	_ = orderR
 
 	orderItemR, err := orderR.AddSubResource("OrderItems")
