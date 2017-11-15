@@ -12,13 +12,16 @@ import (
 	"github.com/qor/media"
 	"github.com/qor/media/oss"
 	"github.com/qor/oss/s3"
+	"github.com/qor/qor-example-cases/config"
+	"github.com/qor/roles"
 	appkitlog "github.com/theplant/appkit/log"
 	"github.com/theplant/appkit/server"
 )
 
 type Order struct {
 	gorm.Model
-	OrderItems []*OrderItem
+	Name       string
+	OrderItems []OrderItem
 }
 
 type OrderItem struct {
@@ -38,17 +41,15 @@ type Config struct {
 }
 
 func main() {
-	db, err := gorm.Open("postgres", "user=qor_test password=123 dbname=qor_test sslmode=disable host=localhost port=6000")
-	if err != nil {
-		panic(err)
-	}
+	db := config.DB
 	config := Config{}
-	err = configor.Load(&config)
+	err := configor.Load(&config)
 	if err != nil {
 		panic(err)
 	}
 
 	db.LogMode(true)
+	db.DropTable(&Order{}, &OrderItem{})
 	db.AutoMigrate(&Order{}, &OrderItem{})
 	order := &Order{}
 	err = db.Create(order).Error
@@ -69,7 +70,7 @@ func main() {
 	db.AutoMigrate(&Order{})
 
 	adm := admin.New(&admin.AdminConfig{DB: db})
-	orderR := adm.AddResource(&Order{})
+	orderR := adm.AddResource(&Order{}, &admin.Config{Permission: roles.Deny(roles.Create, roles.Anyone)})
 	_ = orderR
 
 	orderItemR, err := orderR.AddSubResource("OrderItems")
