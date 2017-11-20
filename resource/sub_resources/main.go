@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/jinzhu/configor"
@@ -39,6 +41,10 @@ type OSS struct {
 func (o *OSS) Scan(data interface{}) (err error) {
 	switch values := data.(type) {
 	case []byte:
+		if strings.HasPrefix(string(values), "{") && strings.HasSuffix(string(values), "}") {
+			json.Unmarshal(values, 0)
+			return
+		}
 		if string(values) != "" {
 			o.Url = string(values)
 		}
