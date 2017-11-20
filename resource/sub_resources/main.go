@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
@@ -87,25 +88,25 @@ func main() {
 	}
 
 	db.LogMode(true)
-	db.DropTable(&Order{}, &OrderItem{})
-	db.AutoMigrate(&Order{}, &OrderItem{})
-	order := &Order{}
-	err = db.Create(order).Error
-	if err != nil {
-		panic(err)
-	}
-	for i := 0; i < 5; i++ {
-		err = db.Create(&OrderItem{OrderID: order.ID, Name: fmt.Sprintf("Order Item %d", i)}).Error
+	media.RegisterCallbacks(db)
+
+	if os.Getenv("DATA") != "" {
+		db.DropTable(&Order{}, &OrderItem{})
+		db.AutoMigrate(&Order{}, &OrderItem{})
+		order := &Order{}
+		err = db.Create(order).Error
 		if err != nil {
 			panic(err)
+		}
+		for i := 0; i < 5; i++ {
+			err = db.Create(&OrderItem{OrderID: order.ID, Name: fmt.Sprintf("Order Item %d", i)}).Error
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
 	oss.Storage = s3.New(&s3.Config{AccessID: config.AccessID, AccessKey: config.AccessKey, Region: config.Region, Bucket: config.Bucket})
-
-	media.RegisterCallbacks(db)
-
-	db.AutoMigrate(&Order{})
 
 	adm := admin.New(&admin.AdminConfig{DB: db})
 	orderR := adm.AddResource(&Order{})
