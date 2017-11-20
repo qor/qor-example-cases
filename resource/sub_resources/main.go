@@ -92,7 +92,11 @@ func main() {
 
 	if os.Getenv("DATA") != "" {
 		db.DropTable(&Order{}, &OrderItem{})
-		db.AutoMigrate(&Order{}, &OrderItem{})
+	}
+
+	db.AutoMigrate(&Order{}, &OrderItem{})
+
+	if os.Getenv("DATA") != "" {
 		order := &Order{}
 		err = db.Create(order).Error
 		if err != nil {
