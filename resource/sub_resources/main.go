@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/jinzhu/configor"
@@ -39,6 +40,17 @@ type OSS struct {
 	oss.OSS
 }
 
+func (o OSS) GetURLTemplate(option *media.Option) (url string) {
+	fmt.Println("option = ", option, "oss = ", o)
+	if url = option.Get("URL"); url == "" {
+		url = fmt.Sprintf("/%s/%d.{{extension}}", time.Now().Format("20060102"), time.Now().UnixNano())
+	}
+
+	return
+}
+
+var domain = "//qor3-agc-develop.s3.ap-northeast-1.amazonaws.com"
+
 func (o *OSS) Scan(data interface{}) (err error) {
 	switch values := data.(type) {
 	case []byte:
@@ -46,17 +58,21 @@ func (o *OSS) Scan(data interface{}) (err error) {
 			return json.Unmarshal(values, o)
 		}
 		if string(values) != "" {
-			o.Url = string(values)
+			o.Url = domain + string(values)
 		}
+		fmt.Printf("[]byte %+v\n", string(values))
 	case string:
+		fmt.Printf("string %+v\n", string(values))
 		return o.Scan([]byte(values))
 	case []string:
 		for _, str := range values {
+			fmt.Printf("[]string %+v\n", str)
 			if err := o.Scan(str); err != nil {
 				return err
 			}
 		}
 	default:
+		fmt.Printf("default %+v\n", data)
 		return o.OSS.Scan(data)
 	}
 	return
@@ -66,8 +82,8 @@ func (o OSS) Value() (driver.Value, error) {
 	if o.Delete {
 		return nil, nil
 	}
-
-	return o.Url, nil
+	fmt.Printf("Value %+v\n", o.Url)
+	return strings.Replace(o.Url, domain, "", -1), nil
 }
 
 // run with dummy data
@@ -118,6 +134,8 @@ func main() {
 	_ = orderR
 
 	orderItemR, err := orderR.AddSubResource("OrderItems")
+	orderItemR.UseTheme("grid")
+	orderItemR.IndexAttrs("CustomFile", "Name")
 	if err != nil {
 		panic(err)
 	}
