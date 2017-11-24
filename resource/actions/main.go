@@ -55,6 +55,17 @@ func main() {
 		Modes:      []string{"edit", "index", "show"},
 		Permission: roles.Allow(roles.CRUD, roles.Anyone),
 	})
+	orderR.Action(&admin.Action{
+		Name: "Action with download",
+		Handler: func(argument *admin.ActionArgument) error {
+			w := argument.Context.Writer
+			w.Header().Set("Content-Disposition", "attachment; filename=file.csv")
+			w.Write([]byte("Hello world"))
+			return nil
+		},
+		Modes:      []string{"index", "menu_item"},
+		Permission: roles.Allow(roles.CRUD, roles.Anyone),
+	})
 
 	mux := http.NewServeMux()
 	adm.MountTo("/admin", mux)
