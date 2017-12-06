@@ -70,10 +70,11 @@ func main() {
 
 	orderR.Meta(&admin.Meta{Name: "Images", Type: "collection_edit"})
 
+	oldSaveHandler := orderR.SaveHandler
 	orderR.SaveHandler = func(v interface{}, ctx *qor.Context) (err error) {
 		ord := v.(*Order)
 		fmt.Println("len(ord.Images) = ", len(ord.Images))
-		return nil
+		return oldSaveHandler(v, ctx)
 	}
 
 	mux := http.NewServeMux()
