@@ -52,6 +52,16 @@ func main() {
 		Handler: func(argument *admin.ActionArgument) error {
 			return nil
 		},
+		Resource:   orderR,
+		Modes:      []string{"edit", "index", "collection"},
+		Permission: roles.Allow(roles.CRUD, roles.Anyone),
+	})
+
+	orderR.Action(&admin.Action{
+		Name: "Action runs OK",
+		Handler: func(argument *admin.ActionArgument) error {
+			return nil
+		},
 		Modes:      []string{"edit", "index", "show"},
 		Permission: roles.Allow(roles.CRUD, roles.Anyone),
 	})
