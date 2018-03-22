@@ -47,13 +47,16 @@ func main() {
 		Permission: roles.Allow(roles.CRUD, roles.Anyone),
 	})
 
+	type CollectionRes struct {
+		Name string
+	}
 	orderR.Action(&admin.Action{
-		Name: "Action runs OK",
+		Name: "Action runs collection",
 		Handler: func(argument *admin.ActionArgument) error {
 			return nil
 		},
-		Resource:   orderR,
-		Modes:      []string{"edit", "index", "collection"},
+		Resource:   adm.NewResource(&CollectionRes{}),
+		Modes:      []string{"edit", "collection"},
 		Permission: roles.Allow(roles.CRUD, roles.Anyone),
 	})
 
